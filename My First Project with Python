@@ -1,0 +1,18 @@
+dict_inventory = {
+    "Bubblegum": 202,
+    "Toffee": 118,
+    "Ice cream": 2250,
+    "Milk chocolate": 1680,
+    "Doughnut": 1075,
+    "Pancake": 80
+}
+print("Earned amount:")
+for k, v in dict_inventory.items():
+    print(f"{k}: ${v}")
+float_income = sum(dict_inventory.values())
+print(f"Income: ${float_income:.2f}")
+print("Staff expenses:")
+float_income -= int(input())
+print("Other expenses:")
+float_income -= int(input())
+print(f"Net income: ${float_income:.2f}")
