@@ -1,0 +1,131 @@
+#!/usr/bin/bash
+
+numberPattern="^-?[0-9]+\.?[0-9]+?$"
+definitionPattern="^[a-z]+_to_[a-z]+ -?[0-9]+\.?[0-9]+?$"
+file_name="definitions.txt"
+
+# Start with the welcome message Welcome to the Simple converter!
+echo "Welcome to the Simple converter!";
+while true;
+do
+    # Ask for the option;
+    echo "Select an option"
+    echo "0. Type '0' or 'quit' to end program";
+    echo "1. Convert units";
+    echo "2. Add a definition";
+    echo "3. Delete a definition";
+    read -r menu_selection
+    # Check whether the option is correct
+    if [[ "$menu_selection" == "0" || "$menu_selection" == "quit" ]];
+    then
+        break;
+    fi
+    case $menu_selection in
+        1)
+            if [[ ! -s "$file_name" ]];
+            then
+                echo "Please add a definition first!";
+            else
+                while true;
+                do
+                    echo "Type the line number to convert units or '0' to return"
+                    lineCount=$(wc -l < "$file_name")
+                    for n in $(seq 1 "$lineCount");
+                    do
+                        line=$(sed "${n}!d" "$file_name");
+                        echo "$n. $line"
+                    done
+                    read -r convertUnitsInput;
+                    case "$convertUnitsInput" in
+                        "0")
+                            break;
+                            ;;
+                        *)
+                            while true;
+                            do
+                                if [[ ! $convertUnitsInput =~ $numberPattern || $convertUnitsInput -gt $lineCount ]]
+                                then
+                                    echo "Enter a valid line number!";
+                                    read -r convertUnitsInput;
+                                    continue;
+                                else
+                                    constant=$(sed "$convertUnitsInput!d" "$file_name");
+                                    constant=${constant#* };
+                                    while true;
+                                    do
+                                        echo "Enter a value to convert:";
+                                        while true;
+                                        do
+                                            read -r value;
+                                            if [[ ! $value =~ $numberPattern ]];
+                                            then
+                                                echo "Enter a float or integer value!";
+                                            else
+                                                result=$(echo "scale=2; $constant * $value" | bc -l)
+                                                echo "Result: $result"
+                                                break;
+                                            fi
+                                        done
+                                    break;
+                                    done
+                                fi
+                                break;
+                            done
+                            ;;
+                        esac
+                    break;
+                done
+            fi
+            ;;
+        2)
+            while true;
+            do
+                echo "Enter a definition:";
+                read -r addDefinition;
+                if [[ "$addDefinition" =~ $definitionPattern  ]];
+                then
+                    echo "$addDefinition" >> "$file_name";
+                    break;
+                else
+                    echo "The definition is incorrect!";
+                fi
+            done
+            ;;
+        3)
+            if [[ -s "$file_name" ]];
+            then
+                echo "Type the line number to delete or '0' to return";
+                nl -w1 -s". " "$file_name";
+                while true;
+                do
+                    read -r lineNumber;
+                    case "$lineNumber" in
+                        "")
+                            echo "Enter a valid line number!";
+                            ;;
+                        "0")
+                            break;
+                            ;;
+                        *) 
+                            line_count0=$(wc -l < "$file_name")
+                            sed -i "${lineNumber}d" "$file_name";
+                            line_count1=$(wc -l < "$file_name")
+                            if [ $line_count0 -gt $line_count1 ];
+                            then
+                                break;
+                            else
+                                echo "Enter a valid line number!";
+                            fi
+                            ;;
+                    esac
+                done
+            else
+                echo "Please add a definition first!";
+            fi
+            ;;
+        *)
+            echo "Invalid option!";
+            ;;
+    esac
+done
+echo "Goodbye!";
